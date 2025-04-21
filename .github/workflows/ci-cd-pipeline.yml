@@ -58,8 +58,8 @@ jobs:
           # Assume OIDC (Recomendado) ou Access Keys
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_TO_ASSUME }} # MESMA Role pode ser usada se tiver permissão para este lambda/s3 key
           aws-region: ${{ secrets.AWS_REGION }}
-          # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Find Shaded JAR File
         id: find_jar
