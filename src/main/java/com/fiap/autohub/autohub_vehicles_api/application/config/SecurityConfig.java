@@ -3,6 +3,7 @@ package com.fiap.autohub.autohub_vehicles_api.application.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -34,8 +35,13 @@ public class SecurityConfig {
                                         "/swagger-ui/**",
                                         "/v3/api-docs",
                                         "/v3/api-docs/**",
-                                        "/ping",
                                         "/vehicles/ping"
+                                ).permitAll()
+                                .requestMatchers(
+                                        HttpMethod.GET,
+                                        "/vehicles/available",
+                                        "/vehicles/sold",
+                                        "/vehicles/{id}"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 );

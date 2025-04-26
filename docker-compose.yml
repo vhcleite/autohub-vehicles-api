@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  postgres-vehicles:
+    image: postgres:15
+    container_name: autohub_postgres_vehicles
+    environment:
+      POSTGRES_DB: autohub_vehicles
+      POSTGRES_USER: vehiclesadmin
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_vehicles_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_vehicles_data:
+    driver: local

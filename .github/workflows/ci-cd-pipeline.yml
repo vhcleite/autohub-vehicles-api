@@ -61,6 +61,15 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: Run Flyway Migrations
+        env:
+          FLYWAY_URL: ${{ secrets.RDS_URL_VEHICLES }} # Ex: jdbc:postgresql://host:port/dbw
+          FLYWAY_USER: ${{ secrets.RDS_USER_VEHICLES }} # Usuário com permissão de DDL/DML
+          FLYWAY_PASSWORD: ${{ secrets.RDS_PASSWORD_VEHICLES }} # Senha deste usuário
+        # Executa o goal 'migrate' do plugin Flyway do Maven
+        # Passa as credenciais via propriedades -D (alternativa à configuração no POM)
+        run: ./mvnw flyway:migrate -Dflyway.url=$FLYWAY_URL -Dflyway.user=$FLYWAY_USER -Dflyway.password=$FLYWAY_PASSWORD
+
       - name: Find Shaded JAR File
         id: find_jar
         run: |
