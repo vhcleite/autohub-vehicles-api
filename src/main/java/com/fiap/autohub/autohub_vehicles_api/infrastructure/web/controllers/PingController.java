@@ -1,4 +1,4 @@
-package com.fiap.autohub.autohub_vehicles_api.infrastructure.web.constrollers;
+package com.fiap.autohub.autohub_vehicles_api.infrastructure.web.controllers;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

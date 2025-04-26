@@ -1,18 +1,21 @@
-# src/test/resources/application-test.yml
 spring:
-  # Configura o H2 em memória
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE # Banco H2 em memória
     driverClassName: org.h2.Driver
     username: sa
     password: ""
-  # Configura o Hibernate para criar/dropar o schema baseado nas suas @Entity
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create-drop # Cria e dropa schema para cada teste
     show-sql: false
     database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true
-
+  # Desabilitar Flyway/Liquibase em testes
   flyway:
     enabled: false
+  # Configuração de segurança pode ser simplificada ou desabilitada para certos testes
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://test.issuer
