@@ -10,8 +10,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
-@ActiveProfiles({"test", "local"})
-@Testcontainers // Habilita a integração com Testcontainers
+@ActiveProfiles("test")
+@Testcontainers
 class AutohubVehiclesApiApplicationTests {
 
     // Define o container PostgreSQL.
