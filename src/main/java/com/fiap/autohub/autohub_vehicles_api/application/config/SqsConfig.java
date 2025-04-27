@@ -19,7 +19,6 @@ public class SqsConfig {
     @Bean
     @Profile("!local")
     public SqsAsyncClient sqsAsyncClientProd(@Value("${aws.region}") String awsRegion) {
-        // O SqsTemplate (usado pelo @SqsListener) prefere o cliente Async
         return SqsAsyncClient.builder()
                 .region(Region.of(awsRegion))
                 .credentialsProvider(DefaultCredentialsProvider.create())
