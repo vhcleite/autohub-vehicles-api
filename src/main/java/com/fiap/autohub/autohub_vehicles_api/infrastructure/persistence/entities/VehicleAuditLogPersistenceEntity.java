@@ -14,6 +14,7 @@ public class VehicleAuditLogPersistenceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "audit_id", nullable = false)
     private Long auditId;
 
     @Column(name = "vehicle_id", nullable = false)
