@@ -27,8 +27,7 @@ public interface VehicleServicePort {
 
     void deleteVehicleLogically(UUID id, String ownerId);
 
-    // Métodos para Saga (chamados por listeners de evento ou Sales API)
-    Vehicle reserveVehicle(UUID id, String saleId); // Lança exceção se não puder reservar
+    Vehicle reserveVehicle(UUID id, UUID saleId);
 
     Vehicle markVehicleAsSold(UUID id);
 
