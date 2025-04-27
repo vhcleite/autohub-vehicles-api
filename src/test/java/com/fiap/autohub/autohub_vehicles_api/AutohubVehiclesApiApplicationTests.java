@@ -10,7 +10,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "local"})
 @Testcontainers // Habilita a integração com Testcontainers
 class AutohubVehiclesApiApplicationTests {
 
