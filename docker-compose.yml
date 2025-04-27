@@ -11,7 +11,27 @@ services:
       - "5434:5432"
     volumes:
       - postgres_vehicles_data:/var/lib/postgresql/data
+  localstack:
+    container_name: autohub_localstack
+    image: localstack/localstack:3.5
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sns,sqs
+      - DEBUG=0
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./localstack_data}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack-init:/etc/localstack/init/ready.d"
+    networks:
+      - autohub_net
 
 volumes:
   postgres_vehicles_data:
     driver: local
+
+networks:
+  autohub_net:
+    driver: bridge
