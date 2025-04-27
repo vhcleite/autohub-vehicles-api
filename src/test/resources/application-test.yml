@@ -4,8 +4,8 @@ spring:
       region:
         static: us-east-1
       credentials:
-        access-key: test
-        secret-key: test
+        access-key: test1
+        secret-key: test1
   jpa:
     hibernate:
       ddl-auto: create-drop
