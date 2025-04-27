@@ -5,9 +5,25 @@ spring:
     show-sql: true
   flyway:
     enabled: false
+  autoconfigure:
+    exclude:
+      - io.awspring.cloud.autoconfigure.config.secretsmanager.SecretsManagerAutoConfiguration
+      - io.awspring.cloud.autoconfigure.sqs.SqsListenerAutoConfiguration
+      - io.awspring.cloud.autoconfigure.sqs.SqsAutoConfiguration
 
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: https://test.issuer
+
+aws:
+  region: us-east-1
+
+sqs:
+  queue:
+    vehicles-sale-created: VehiclesApi_SaleCreated_Queue-local
+
+sns:
+  topic:
+    main-event-bus-arn: arn:aws:sns:us-east-1:000000000000:AutoHubBusinessEventsTopic-local

@@ -4,11 +4,13 @@ import com.fiap.autohub.autohub_vehicles_api.domain.commands.CreateVehicleComman
 import com.fiap.autohub.autohub_vehicles_api.domain.commands.UpdateVehicleCommand;
 import com.fiap.autohub.autohub_vehicles_api.domain.entities.Vehicle;
 import com.fiap.autohub.autohub_vehicles_api.domain.entities.VehicleStatus;
+import com.fiap.autohub.autohub_vehicles_api.domain.events.VehicleReservedEvent;
 import com.fiap.autohub.autohub_vehicles_api.domain.exceptions.OptimisticLockingException;
 import com.fiap.autohub.autohub_vehicles_api.domain.exceptions.VehicleNotFoundException;
 import com.fiap.autohub.autohub_vehicles_api.domain.exceptions.VehicleUpdateForbiddenException;
 import com.fiap.autohub.autohub_vehicles_api.domain.ports.in.VehicleServicePort;
 import com.fiap.autohub.autohub_vehicles_api.domain.ports.out.VehicleRepositoryPort;
+import com.fiap.autohub.autohub_vehicles_api.infrastructure.messaging.publishers.SNSEventPublisher;
 import com.fiap.autohub.autohub_vehicles_api.infrastructure.persistence.entities.VehiclePersistenceEntity;
 import jakarta.persistence.OptimisticLockException;
 import org.slf4j.Logger;
@@ -26,19 +28,21 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service // Indica que é um bean de serviço Spring
+@Service
 public class VehicleServiceImpl implements VehicleServicePort {
 
     private static final Logger logger = LoggerFactory.getLogger(VehicleServiceImpl.class);
 
     private final VehicleRepositoryPort vehicleRepository;
+    private final SNSEventPublisher eventPublisher;
 
-    public VehicleServiceImpl(VehicleRepositoryPort vehicleRepository) {
+    public VehicleServiceImpl(VehicleRepositoryPort vehicleRepository, SNSEventPublisher eventPublisher) {
         this.vehicleRepository = vehicleRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
-    @Transactional // Garante atomicidade na criação
+    @Transactional
     public Vehicle createVehicle(CreateVehicleCommand command, String ownerId) {
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
         Vehicle newVehicle = new Vehicle(
@@ -49,9 +53,9 @@ public class VehicleServiceImpl implements VehicleServicePort {
                 command.color(),
                 command.price(),
                 command.description(),
-                VehicleStatus.AVAILABLE, // Status inicial
-                ownerId, // ID do dono vindo do Principal
-                0L, // Versão inicial
+                VehicleStatus.AVAILABLE,
+                ownerId,
+                0L,
                 now,
                 now
         );
@@ -138,7 +142,7 @@ public class VehicleServiceImpl implements VehicleServicePort {
 
     @Override
     @Transactional
-    public Vehicle reserveVehicle(UUID id, String saleId) {
+    public Vehicle reserveVehicle(UUID id, UUID saleId) {
         logger.info("Attempting to reserve vehicle {} for sale {}", id, saleId);
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException("Vehicle " + id + " not found for reservation by sale " + saleId));
@@ -150,19 +154,17 @@ public class VehicleServiceImpl implements VehicleServicePort {
 
         Vehicle reservedVehicle = new Vehicle(
                 vehicle.id(), vehicle.make(), vehicle.model(), vehicle.year(), vehicle.color(), vehicle.price(), vehicle.description(),
-                VehicleStatus.RESERVED, // Muda status
-                vehicle.ownerId(), vehicle.version(), // Passa a versão atual
+                VehicleStatus.RESERVED,
+                vehicle.ownerId(), vehicle.version(),
                 vehicle.createdAt(), OffsetDateTime.now(ZoneOffset.UTC)
         );
         try {
-            Vehicle saved = vehicleRepository.save(reservedVehicle); // Tenta salvar com a versão atual
+            Vehicle saved = vehicleRepository.save(reservedVehicle);
             logger.info("Vehicle {} reserved successfully for sale {}", id, saleId);
-            // TODO: Publicar evento VehicleReserved (com saleId, vehicleId) para o SNS/EventBridge
-            // Ex: eventPublisher.publish(new VehicleReservedEvent(saved.id(), saleId));
+            eventPublisher.publishVehicleReserved(new VehicleReservedEvent(saleId, saved.id()));
             return saved;
         } catch (OptimisticLockException ex) {
-            logger.warn("Optimistic lock exception while reserving vehicle {}", id, ex);
-            throw new OptimisticLockingException("Failed to reserve vehicle due to concurrent modification.", ex);
+            throw new OptimisticLockingException("Failed to update vehicle due to concurrent modification.", ex);
         }
     }
 
@@ -210,7 +212,6 @@ public class VehicleServiceImpl implements VehicleServicePort {
             try {
                 vehicleRepository.save(availableVehicle);
                 logger.info("Vehicle {} unreserved successfully.", id);
-                // TODO: Publicar evento VehicleReservationCancelled? (Opcional)
             } catch (OptimisticLockException ex) {
                 logger.error("CRITICAL: Failed to unreserve vehicle {} due to concurrent modification during compensation.", id, ex);
                 throw new OptimisticLockingException("Failed to unreserve vehicle during compensation.", ex);

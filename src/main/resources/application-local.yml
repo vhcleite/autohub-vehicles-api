@@ -12,3 +12,17 @@ spring:
   flyway:
     enabled: false
 
+aws:
+  localstack:
+    endpoint: http://localhost:4566 # Endpoint padrão do LocalStack
+  credentials:
+    accessKey: test # Credenciais dummy para LocalStack
+    secretKey: test
+
+sqs:
+  queue:
+    vehicles-sale-created: VehiclesApi_SaleCreated_Queue-local
+
+sns:
+  topic:
+    main-event-bus-arn: arn:aws:sns:us-east-1:000000000000:AutoHubBusinessEventsTopic-local

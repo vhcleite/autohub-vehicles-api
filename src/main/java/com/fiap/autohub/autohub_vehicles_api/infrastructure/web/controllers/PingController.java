@@ -13,6 +13,6 @@ public class PingController {
     @GetMapping("/vehicles/ping")
     public String ping() {
         logger.info("Ping endpoint invoked!");
-        return "pong-1";
+        return "pong-2";
     }
 }
