@@ -15,7 +15,7 @@ import java.net.URI;
 @Configuration
 public class SnsConfig {
     @Bean
-    @Profile("!local & !test")
+    @Profile("!local")
     public SnsClient snsClientProd(@Value("${aws.region}") String awsRegion) {
         return SnsClient.builder()
                 .region(Region.of(awsRegion))

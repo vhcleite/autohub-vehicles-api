@@ -17,7 +17,7 @@ import java.net.URI;
 public class SqsConfig {
 
     @Bean
-    @Profile("!local & !test")
+    @Profile("!local")
     public SqsAsyncClient sqsAsyncClientProd(@Value("${aws.region}") String awsRegion) {
         // O SqsTemplate (usado pelo @SqsListener) prefere o cliente Async
         return SqsAsyncClient.builder()
