@@ -5,6 +5,8 @@ spring:
     show-sql: true
   flyway:
     enabled: false
+  autoconfigure:
+    exclude: io.awspring.cloud.autoconfigure.config.secretsmanager.SecretsManagerAutoConfiguration
 
   security:
     oauth2:
