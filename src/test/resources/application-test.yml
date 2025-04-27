@@ -1,19 +1,11 @@
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE # Banco H2 em memória
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ""
   jpa:
     hibernate:
-      ddl-auto: create-drop # Cria e dropa schema para cada teste
-    show-sql: false
-    database-platform: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
-  # Desabilitar Flyway/Liquibase em testes
+      ddl-auto: create-drop
+    show-sql: true
   flyway:
     enabled: false
-  # Configuração de segurança pode ser simplificada ou desabilitada para certos testes
+
   security:
     oauth2:
       resourceserver:
