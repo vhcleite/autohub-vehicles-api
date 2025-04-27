@@ -34,3 +34,6 @@ springdoc:
   api-docs:
     path: /v3/api-docs
   default-property-naming-strategy: snake_case
+
+aws:
+  region: us-east-1

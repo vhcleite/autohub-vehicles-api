@@ -13,7 +13,6 @@ spring:
     enabled: false
 
 aws:
-  region: us-east-1
   localstack:
     endpoint: http://localhost:4566 # Endpoint padrão do LocalStack
   credentials:
