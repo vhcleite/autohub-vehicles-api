@@ -92,6 +92,13 @@ jobs:
 
       - name: Update SQS Lambda Function Code (Dev)
         run: |
+          
+          # --- DEBUGGING - REMOVE AFTER USE ---
+          echo "DEBUG SQS Lambda Name: >>${{ secrets.LAMBDA_FUNCTION_NAME_VEHICLES_SQS }}<<"
+          echo "DEBUG S3 Bucket: >>${{ secrets.S3_DEPLOY_BUCKET }}<<"
+          echo "DEBUG S3 Key: >>${{ secrets.S3_DEPLOY_KEY_VEHICLES }}<<"
+          # --- END DEBUGGING ---
+          
           aws lambda update-function-code \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME_VEHICLES_SQS }} \ 
             --s3-bucket ${{ secrets.S3_DEPLOY_BUCKET }} \
