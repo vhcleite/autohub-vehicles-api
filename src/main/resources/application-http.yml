@@ -1,0 +1,13 @@
+spring:
+  cloud:
+    aws:
+      sqs:
+        enabled: false # Desabilita completamente SQS para a Lambda HTTP
+      sns:
+        enabled: false # Desabilita SNS se não for usado por endpoints HTTP
+  autoconfigure:
+    exclude:
+      # Exclui configurações automáticas de SQS e SNS para evitar inicialização
+      - io.awspring.cloud.autoconfigure.sqs.SqsAutoConfiguration
+      - io.awspring.cloud.autoconfigure.sqs.SqsListenerAutoConfiguration
+      - io.awspring.cloud.autoconfigure.sns.SnsAutoConfiguration
