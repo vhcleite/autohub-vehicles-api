@@ -4,11 +4,11 @@ name: CI/CD Pipeline - AutoHub Vehicles API Java
 on:
   push:
     branches:
-      - main # ou master
+      - main
       - develop
   pull_request:
     branches:
-      - main # ou master
+      - main
       - develop
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
         id: find_jar
         run: |
           # Ajuste o padrão do nome do JAR se for diferente
-          JAR_FILE=$(find target -maxdepth 1 -name 'autohub-vehicles-api-*-SNAPSHOT.jar' -not -name '*-plain.jar' -not -name '*-original.jar' | head -n 1)
+          JAR_FILE=$(find target -maxdepth 1 -name 'autohub-vehicles-api-*-SNAPSHOT-aws.jar' -not -name '*-plain.jar' -not -name '*-original.jar' | head -n 1)
           if [ -z "$JAR_FILE" ]; then
             echo "Shaded JAR file not found in target/!"
             exit 1
@@ -80,11 +80,20 @@ jobs:
         env:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Update Lambda Function Code
-        # Usa secrets específicos para o nome da função Lambda DESTA API
+      - name: Update HTTP Lambda Function Code (Dev)
         run: |
           aws lambda update-function-code \
-            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME_VEHICLES }} \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME_VEHICLES_HTTP }} \
+            --s3-bucket ${{ secrets.S3_DEPLOY_BUCKET }} \
+            --s3-key ${{ secrets.S3_DEPLOY_KEY_VEHICLES }} \
+            --publish
+        env:
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Update SQS Lambda Function Code (Dev)
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME_VEHICLES_SQS }} \ 
             --s3-bucket ${{ secrets.S3_DEPLOY_BUCKET }} \
             --s3-key ${{ secrets.S3_DEPLOY_KEY_VEHICLES }} \
             --publish

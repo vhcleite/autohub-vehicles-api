@@ -1,0 +1,21 @@
+# Configurações específicas para quando o perfil 'sqs' está ativo
+spring:
+  autoconfigure:
+    exclude:
+      # Exclui configurações automáticas da Web se não forem necessárias
+      - org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration
+      - org.springframework.boot.autoconfigure.web.embedded.EmbeddedWebServerFactoryCustomizerAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+      - org.springframework.cloud.function.serverless.web.ServerlessAutoConfiguration
+
+  cloud:
+    function:
+      definition: saleCreatedConsumer
+
+logging:
+  level:
+    io.awspring.cloud.sqs: DEBUG # Nível DEBUG para o framework SQS
+    com.fiap.autohub: DEBUG
