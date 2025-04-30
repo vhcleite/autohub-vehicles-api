@@ -100,7 +100,7 @@ jobs:
           # --- END DEBUGGING ---
           
           aws lambda update-function-code \
-            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME_VEHICLES_SQS }} \ 
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME_VEHICLES_SQS }} \
             --s3-bucket ${{ secrets.S3_DEPLOY_BUCKET }} \
             --s3-key ${{ secrets.S3_DEPLOY_KEY_VEHICLES }} \
             --publish

@@ -8,8 +8,6 @@ import java.util.UUID;
 
 /**
  * Representa o evento SaleCreated recebido pela Vehicles API.
- * A estrutura DEVE corresponder ao JSON publicado pela Sales API.
- * Usamos @JsonProperty para mapear os nomes snake_case do JSON para camelCase do Java.
  */
 public record SaleCreatedEvent(
         @JsonProperty("event_id") UUID eventId,
