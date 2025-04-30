@@ -33,6 +33,12 @@ public class SaleCreatedListener {
     }
 
     public void handleSaleCreatedEvent(SQSEvent sqsEvent) {
+        try {
+            logger.info("sqsEvent {}", objectMapper.writeValueAsString(sqsEvent));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         if (sqsEvent == null || sqsEvent.getRecords() == null) {
             logger.warn("Received null or empty SQSEvent in vehicles-api.");
             return;
