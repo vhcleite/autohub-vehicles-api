@@ -18,7 +18,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@Profile("http")
+@Profile({"http", "local"})
 public class SecurityConfig {
 
     @Bean
