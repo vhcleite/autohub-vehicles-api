@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class SaleCreatedListener {
@@ -31,49 +32,74 @@ public class SaleCreatedListener {
         this.eventPublisher = eventPublisher;
     }
 
-    public void handleSaleCreatedEvent(SQSEvent messagePayload) {
-        SaleCreatedEvent event = null;
-        logger.info("Received potential SaleCreatedEvent message: {}", messagePayload);
-        List<SQSEvent.SQSMessage> messages = messagePayload.getRecords();
+    public void handleSaleCreatedEvent(SQSEvent sqsEvent) {
+        if (sqsEvent == null || sqsEvent.getRecords() == null) {
+            logger.warn("Received null or empty SQSEvent in vehicles-api.");
+            return;
+        }
+        logger.info("Received SQS event with {} record(s) in vehicles-api.", sqsEvent.getRecords().size());
+        List<SQSEvent.SQSMessage> messages = sqsEvent.getRecords();
+
         for (SQSEvent.SQSMessage message : messages) {
+            String messageId = message.getMessageId();
+            String messageBody = message.getBody();
+            logger.debug("Processing message ID: {}, Body: {}", messageId, messageBody);
+            SaleCreatedEvent event = null;
+
             try {
-                event = objectMapper.readValue(message.getBody(), SaleCreatedEvent.class);
-                logger.info("Processing SaleCreatedEvent for saleId: {}, vehicleId: {}", event.saleId(), event.vehicleId());
+                // Desserializa o CORPO da mensagem SQS para o evento SaleCreatedEvent
+                event = objectMapper.readValue(messageBody, SaleCreatedEvent.class);
+                if (event == null || event.data() == null || event.data().saleId() == null || event.data().vehicleId() == null) {
+                    logger.error("Failed to parse essential data (saleId, vehicleId) from message body (Message ID: {}): {}", messageId, messageBody);
+                    throw new JsonProcessingException("Parsed event or its data/ids are null") {
+                    }; // Lança exceção para indicar falha no parsing
+                }
 
-                vehicleService.reserveVehicle(event.vehicleId(), event.saleId());
+                logger.info("Processing SaleCreatedEvent for saleId: {}, vehicleId: {}", event.data().saleId(), event.data().vehicleId());
 
-                logger.info("Successfully processed SaleCreatedEvent for vehicleId: {}", event.vehicleId());
+                // Chama o serviço com os IDs corretos extraídos de event.data()
+                vehicleService.reserveVehicle(event.data().vehicleId(), event.data().saleId());
+
+                logger.info("Successfully processed SaleCreatedEvent for vehicleId: {}", event.data().vehicleId());
 
             } catch (OptimisticLockingException | VehicleUpdateForbiddenException | VehicleNotFoundException e) {
-                logger.warn("HANDLED business error processing SaleCreatedEvent for saleId {}: {}",
-                        (event != null ? event.saleId() : "unknown"), e.getMessage());
+                // Erros de negócio esperados durante a reserva
+                String reason = e.getMessage();
+                UUID saleId = (event != null && event.data() != null) ? event.data().saleId() : null;
+                UUID vehicleId = (event != null && event.data() != null) ? event.data().vehicleId() : null;
 
-                VehicleReservationFailedEvent failureEvent = new VehicleReservationFailedEvent(
-                        event.saleId(),
-                        event.vehicleId(),
-                        e.getMessage()
-                );
-                eventPublisher.publishVehicleReservationFailed(failureEvent);
-                logger.info("Published VehicleReservationFailed event for saleId {}", event.saleId());
+                logger.warn("HANDLED business error processing SaleCreatedEvent for saleId {}: {}", saleId, reason);
+
+                // Publica o evento de falha
+                if (saleId != null && vehicleId != null) {
+                    try {
+                        VehicleReservationFailedEvent failureEvent = new VehicleReservationFailedEvent(saleId, vehicleId, reason);
+                        eventPublisher.publishVehicleReservationFailed(failureEvent);
+                        logger.info("Published VehicleReservationFailed event for saleId {}", saleId);
+                    } catch (Exception publishEx) {
+                        logger.error("CRITICAL: Failed to publish VehicleReservationFailed event for saleId {} after processing failure. SQS Message (ID: {}) MAY BE ACKED!",
+                                saleId, messageId, publishEx);
+                        // Considerar relançar a exceção original 'e' aqui se a publicação da falha for crítica
+                        // throw new RuntimeException("Vehicle reservation failed AND failed to publish failure event", e);
+                    }
+                } else {
+                    logger.error("Cannot publish failure event because saleId or vehicleId is null from message ID: {}", messageId);
+                }
+                // NÃO relança a exceção 'e' aqui para dar ACK na mensagem original, conforme sua preferência
 
             } catch (JsonProcessingException e) {
-                logger.error("Failed to parse SaleCreatedEvent message: {}", messagePayload, e);
-                throw new RuntimeException("Message parsing failed", e);
+                logger.error("Failed to parse SaleCreatedEvent message body (Message ID: {}): {}", messageId, messageBody, e);
+                // Relança para a mensagem ir para DLQ
+                throw new RuntimeException("Message parsing failed for message ID: " + messageId, e);
             } catch (Exception e) {
-                logger.error("Failed to process SaleCreatedEvent for vehicleId {}: {}",
-                        extractVehicleId(message.getBody()),
-                        e.getMessage());
-                throw new RuntimeException("Vehicle reservation processing failed", e); // Relança para DLQ
+                // Erros inesperados durante o processamento
+                UUID vehicleId = (event != null && event.data() != null) ? event.data().vehicleId() : null;
+                logger.error("Unexpected error processing SaleCreatedEvent for vehicleId {} (Message ID: {}): {}",
+                        vehicleId, messageId, e.getMessage(), e);
+                // Relança para a mensagem ir para DLQ
+                throw new RuntimeException("Unexpected vehicle reservation processing failed for message ID: " + messageId, e);
             }
         }
-
-    }
-
-    private String extractVehicleId(String payload) {
-        try {
-            return objectMapper.readTree(payload).path("vehicleId").asText("unknown");
-        } catch (Exception e) {
-            return "unknown";
-        }
+        logger.info("Finished processing batch of {} message(s) in vehicles-api.", messages.size());
     }
 }
