@@ -64,7 +64,7 @@ public class SaleCreatedListener {
                 logger.info("Processing SaleCreatedEvent for saleId: {}, vehicleId: {}", event.data().saleId(), event.data().vehicleId());
 
                 // Chama o serviço com os IDs corretos extraídos de event.data()
-                vehicleService.reserveVehicle(event.data().vehicleId(), event.data().saleId());
+                vehicleService.reserveVehicle(event.data().vehicleId(), event.data().saleId(), event.data().price());
 
                 logger.info("Successfully processed SaleCreatedEvent for vehicleId: {}", event.data().vehicleId());
 

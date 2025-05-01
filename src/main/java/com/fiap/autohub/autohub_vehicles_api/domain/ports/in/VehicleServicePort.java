@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public interface VehicleServicePort {
 
     void deleteVehicleLogically(UUID id, String ownerId);
 
-    Vehicle reserveVehicle(UUID id, UUID saleId);
+    Vehicle reserveVehicle(UUID id, UUID saleId, BigDecimal price);
 
     Vehicle markVehicleAsSold(UUID id);
 

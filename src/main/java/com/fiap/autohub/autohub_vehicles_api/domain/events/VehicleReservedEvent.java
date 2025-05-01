@@ -2,6 +2,7 @@ package com.fiap.autohub.autohub_vehicles_api.domain.events;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
@@ -17,13 +18,13 @@ public record VehicleReservedEvent(
         @JsonProperty("data") EventData data
 ) {
     // Construtor para facilitar a criação a partir da lógica de negócio
-    public VehicleReservedEvent(UUID saleId, UUID vehicleId) {
+    public VehicleReservedEvent(UUID saleId, UUID vehicleId, BigDecimal price) {
         this(
                 UUID.randomUUID(),
                 "VehicleReserved",
                 OffsetDateTime.now(ZoneOffset.UTC),
                 "vehicles-api",
-                new EventData(saleId, vehicleId)
+                new EventData(saleId, vehicleId, price)
         );
     }
 
@@ -32,7 +33,8 @@ public record VehicleReservedEvent(
      */
     public record EventData(
             @JsonProperty("sale_id") UUID saleId,
-            @JsonProperty("vehicle_id") UUID vehicleId
+            @JsonProperty("vehicle_id") UUID vehicleId,
+            @JsonProperty("price") BigDecimal price
     ) {
     }
 
