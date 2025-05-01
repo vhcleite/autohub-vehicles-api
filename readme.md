@@ -5,6 +5,10 @@ atualização, reserva durante o processo de venda e atualização de status fin
 
 ## Integrantes:
 
+- Victor Leite RM354905
+
+## Integrantes:
+
 - Victor Hugo da Costa Leite RM354905
 
 ## Índice
