@@ -3,6 +3,10 @@
 API responsável pelo gerenciamento do ciclo de vida dos veículos na plataforma AutoHub, incluindo cadastro, consulta,
 atualização, reserva durante o processo de venda e atualização de status final (vendido ou retorno para disponível).
 
+## Integrantes:
+
+- Victor Hugo da Costa Leite RM354905
+
 ## Índice
 
 * [Visão Geral](#visão-geral)
@@ -110,11 +114,9 @@ As seguintes variáveis de ambiente são esperadas, especialmente no ambiente AW
 
 1. Certifique-se de que Docker e Docker Compose estão correndo.
 2. Navegue até ao diretório que contém o `docker-compose.yml` (que deve incluir serviços para Postgres e LocalStack).
-3. Inicie os serviços: `docker-compose up -d`.
-4. Use `awslocal` para criar os recursos necessários no LocalStack (tópico SNS, filas SQS, assinaturas) conforme
-   definido no `messaging/main.tf` e `messaging/subscriptions.tf` (ou use um script de inicialização como o
-   `init-aws.sh`).
-5. Inicie a aplicação Spring Boot com os perfis apropriados:
+3. Inicie os serviços: `docker-compose up -d`. Um script já deve criar todos os serviços aws necessários como banco
+   postgres e serviços de mensageria
+4. Inicie a aplicação Spring Boot com os perfis apropriados:
     * Para testar a API/Swagger: `-Dspring.profiles.active=local,http`
     * Para testar o consumidor SQS: `-Dspring.profiles.active=local,sqs`
 
