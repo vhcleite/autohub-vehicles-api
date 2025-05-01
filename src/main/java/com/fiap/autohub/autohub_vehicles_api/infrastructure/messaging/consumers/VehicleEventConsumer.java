@@ -54,7 +54,7 @@ public class VehicleEventConsumer {
 
             try {
                 JsonNode rootNode = objectMapper.readTree(messageBody);
-                String eventType = rootNode.path("eventType").asText(null);
+                String eventType = rootNode.path("event_type").asText(null);
 
                 if (eventType == null) {
                     log.error("Received message (ID: {}) without 'eventType' field: {}", messageId, messageBody);
