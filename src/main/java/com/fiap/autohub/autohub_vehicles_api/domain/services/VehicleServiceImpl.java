@@ -21,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -142,7 +143,7 @@ public class VehicleServiceImpl implements VehicleServicePort {
 
     @Override
     @Transactional
-    public Vehicle reserveVehicle(UUID id, UUID saleId) {
+    public Vehicle reserveVehicle(UUID id, UUID saleId, BigDecimal price) {
         logger.info("Attempting to reserve vehicle {} for sale {}", id, saleId);
         Vehicle vehicle = vehicleRepository.findById(id)
                 .orElseThrow(() -> new VehicleNotFoundException("Vehicle " + id + " not found for reservation by sale " + saleId));
@@ -161,7 +162,7 @@ public class VehicleServiceImpl implements VehicleServicePort {
         try {
             Vehicle saved = vehicleRepository.save(reservedVehicle);
             logger.info("Vehicle {} reserved successfully for sale {}", id, saleId);
-            eventPublisher.publishVehicleReserved(new VehicleReservedEvent(saleId, saved.id()));
+            eventPublisher.publishVehicleReserved(new VehicleReservedEvent(saleId, saved.id(), price));
             return saved;
         } catch (OptimisticLockException ex) {
             throw new OptimisticLockingException("Failed to update vehicle due to concurrent modification.", ex);
