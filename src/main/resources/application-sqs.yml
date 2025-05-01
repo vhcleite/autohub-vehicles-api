@@ -13,7 +13,7 @@ spring:
 
   cloud:
     function:
-      definition: saleCreatedConsumer
+      definition: vehicleEventsConsumer
 
 logging:
   level:
